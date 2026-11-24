@@ -1,0 +1,1561 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FRANKJCR | Control de Acceso Vehicular - Taller Automotriz</title>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- SheetJS (xlsx export) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --primary-light: #eff6ff;
+      --navy-dark: #0f172a;
+      --navy-card: #1e293b;
+      --bg-page: #f1f5f9;
+      --card-bg: #ffffff;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+      --border-focus: #3b82f6;
+      --success: #10b981;
+      --success-hover: #059669;
+      --danger: #ef4444;
+      --danger-hover: #dc2626;
+      --warning: #f59e0b;
+      --warning-bg: #fffbeb;
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+      --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Navigation Bar */
+    header.top-header {
+      background-color: var(--navy-dark);
+      color: white;
+      padding: 0.9rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .brand-logo {
+      background: var(--primary);
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.35rem;
+      color: white;
+      box-shadow: 0 4px 10px rgba(37, 99, 235, 0.4);
+    }
+
+    .brand-text h1 {
+      font-size: 1.35rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      line-height: 1.2;
+    }
+
+    .brand-text p {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      font-weight: 400;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.55rem 1.15rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn-excel {
+      background-color: var(--success);
+      color: white;
+    }
+    .btn-excel:hover {
+      background-color: var(--success-hover);
+    }
+
+    .btn-pdf {
+      background-color: var(--danger);
+      color: white;
+    }
+    .btn-pdf:hover {
+      background-color: var(--danger-hover);
+    }
+
+    .btn-print {
+      background-color: var(--primary);
+      color: white;
+    }
+    .btn-print:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .btn-backup {
+      background-color: #334155;
+      color: #e2e8f0;
+    }
+    .btn-backup:hover {
+      background-color: #475569;
+    }
+
+    /* Main Container */
+    main.main-content {
+      max-width: 1450px;
+      width: 100%;
+      margin: 1.5rem auto;
+      padding: 0 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.75rem;
+    }
+
+    /* Form Card */
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem 2rem;
+      box-shadow: var(--shadow-card);
+      border: 1px solid var(--border-color);
+    }
+
+    .card-header-title {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--navy-dark);
+      margin-bottom: 1.5rem;
+    }
+
+    .card-header-title i.fa-plus-square, .card-header-title i.fa-square-plus {
+      color: var(--primary);
+      font-size: 1.35rem;
+    }
+
+    .auto-badge {
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 0.2rem 0.55rem;
+      background: #e0f2fe;
+      color: #0369a1;
+      border-radius: 20px;
+      margin-left: auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .auto-badge i {
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.4; }
+      50% { opacity: 1; }
+      100% { opacity: 0.4; }
+    }
+
+    /* Grid Layout for Form */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.25rem 1.5rem;
+    }
+
+    .col-span-1 { grid-column: span 1; }
+    .col-span-2 { grid-column: span 2; }
+    .col-span-4 { grid-column: span 4; }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+      position: relative;
+    }
+
+    .form-group label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #334155;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .form-group label span.req {
+      color: var(--danger);
+      margin-left: 2px;
+    }
+
+    .form-group label span.hint {
+      font-weight: 400;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-wrapper input, .input-wrapper select, .form-group textarea {
+      width: 100%;
+      padding: 0.7rem 0.95rem;
+      font-size: 0.9rem;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      outline: none;
+      transition: all 0.2s;
+      color: var(--text-main);
+      background-color: #fafbfc;
+    }
+
+    .input-wrapper input:focus, .input-wrapper select:focus, .form-group textarea:focus {
+      background-color: #ffffff;
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    .input-wrapper i.input-icon {
+      position: absolute;
+      right: 0.9rem;
+      color: #94a3b8;
+      pointer-events: none;
+      font-size: 0.9rem;
+    }
+
+    .input-placa {
+      font-family: 'JetBrains Mono', monospace !important;
+      font-weight: 700 !important;
+      text-transform: uppercase !important;
+      letter-spacing: 1px;
+      color: #0f172a !important;
+      background-color: #f8fafc !important;
+    }
+
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .btn-clear {
+      background-color: #f1f5f9;
+      color: #64748b;
+      padding: 0.75rem 1.3rem;
+      font-size: 0.9rem;
+    }
+    .btn-clear:hover {
+      background-color: #e2e8f0;
+      color: #334155;
+    }
+
+    .btn-save {
+      background-color: var(--primary);
+      color: white;
+      padding: 0.75rem 2rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+    }
+    .btn-save:hover {
+      background-color: var(--primary-hover);
+      box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
+    }
+
+    /* Listado & Search Section */
+    .listado-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .listado-title h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--navy-dark);
+    }
+
+    .listado-title p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 0.2rem;
+    }
+
+    .search-box {
+      position: relative;
+      min-width: 320px;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 0.65rem 1rem 0.65rem 2.4rem;
+      font-size: 0.88rem;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      background-color: #fafbfc;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .search-box input:focus {
+      background-color: #ffffff;
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    .search-box i {
+      position: absolute;
+      left: 0.9rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #94a3b8;
+      font-size: 0.85rem;
+    }
+
+    /* Month Filters & View Options */
+    .filter-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      padding: 0.85rem 0;
+      border-top: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 1.25rem;
+    }
+
+    .filter-label {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #334155;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .filter-pills {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .pill-btn {
+      padding: 0.4rem 0.9rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      border-radius: 20px;
+      border: 1px solid var(--border-color);
+      background: white;
+      color: #475569;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      transition: all 0.15s;
+    }
+
+    .pill-btn:hover {
+      background: #f8fafc;
+      border-color: #cbd5e1;
+    }
+
+    .pill-btn.active {
+      background-color: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .pill-badge {
+      background: rgba(255, 255, 255, 0.25);
+      padding: 0.1rem 0.45rem;
+      border-radius: 10px;
+      font-size: 0.72rem;
+    }
+
+    .pill-btn:not(.active) .pill-badge {
+      background: #e2e8f0;
+      color: #475569;
+    }
+
+    /* Table Section */
+    .month-banner {
+      background: #f8fafc;
+      border: 1px solid var(--border-color);
+      border-bottom: none;
+      border-top-left-radius: var(--radius-md);
+      border-top-right-radius: var(--radius-md);
+      padding: 0.75rem 1.25rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 700;
+      color: var(--navy-dark);
+      font-size: 0.9rem;
+    }
+
+    .month-banner span.veh-count {
+      font-size: 0.78rem;
+      font-weight: 600;
+      background: white;
+      border: 1px solid var(--border-color);
+      padding: 0.2rem 0.65rem;
+      border-radius: 12px;
+      color: #64748b;
+    }
+
+    .table-container {
+      overflow-x: auto;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      background: white;
+    }
+
+    table.veh-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.85rem;
+    }
+
+    table.veh-table th {
+      background-color: #f8fafc;
+      color: #475569;
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 0.72rem;
+      letter-spacing: 0.5px;
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--border-color);
+      white-space: nowrap;
+    }
+
+    table.veh-table td {
+      padding: 0.9rem 1rem;
+      border-bottom: 1px solid #f1f5f9;
+      color: #334155;
+      vertical-align: middle;
+    }
+
+    table.veh-table tr:hover td {
+      background-color: #f8fafc;
+    }
+
+    /* Placa Pill */
+    .plate-badge {
+      display: inline-block;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: 0.82rem;
+      background: #ffffff;
+      color: #0f172a;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 0.22rem 0.55rem;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+      letter-spacing: 0.5px;
+    }
+
+    .time-in {
+      color: var(--primary);
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    /* Botón Marcar Salida con 1 solo click */
+    .btn-marcar-salida {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      background-color: #fffbeb;
+      color: #b45309;
+      border: 1px solid #fde68a;
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .btn-marcar-salida:hover {
+      background-color: #fef3c7;
+      border-color: #f59e0b;
+      color: #92400e;
+      transform: translateY(-1px);
+    }
+
+    .time-out-done {
+      color: #059669;
+      font-weight: 600;
+      background: #ecfdf5;
+      border: 1px solid #a7f3d0;
+      padding: 0.25rem 0.6rem;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.8rem;
+    }
+
+    .obs-text {
+      color: #94a3b8;
+      font-style: italic;
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* Botón Eliminar con 1 solo clic */
+    .btn-delete-row {
+      background: transparent;
+      border: none;
+      color: #f87171;
+      cursor: pointer;
+      padding: 0.4rem;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      transition: all 0.15s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-delete-row:hover {
+      background-color: #fee2e2;
+      color: #dc2626;
+      transform: scale(1.15);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3.5rem 1rem;
+      color: #94a3b8;
+    }
+
+    .empty-state i {
+      font-size: 3rem;
+      margin-bottom: 0.75rem;
+      color: #cbd5e1;
+    }
+
+    .empty-state h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #475569;
+    }
+
+    .empty-state p {
+      font-size: 0.85rem;
+      margin-top: 0.25rem;
+    }
+
+    /* Notification Toast */
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 9999;
+    }
+
+    .toast {
+      background: #1e293b;
+      color: white;
+      padding: 0.85rem 1.25rem;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      font-weight: 500;
+      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      animation: slideIn 0.25s ease-out;
+    }
+
+    .toast.success { border-left: 4px solid var(--success); }
+    .toast.info { border-left: 4px solid var(--primary); }
+    .toast.danger { border-left: 4px solid var(--danger); }
+
+    .toast-undo-btn {
+      background: #334155;
+      color: #60a5fa;
+      border: none;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.78rem;
+      margin-left: 0.5rem;
+    }
+    .toast-undo-btn:hover {
+      background: #475569;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    /* Quick Stats Bar */
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+
+    .stat-card {
+      background: white;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      box-shadow: var(--shadow-card);
+    }
+
+    .stat-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+
+    .stat-blue { background: #eff6ff; color: #2563eb; }
+    .stat-green { background: #ecfdf5; color: #059669; }
+    .stat-yellow { background: #fffbeb; color: #d97706; }
+
+    .stat-info h4 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--navy-dark);
+      line-height: 1.1;
+    }
+
+    .stat-info p {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 0.15rem;
+    }
+
+    /* Print Styles */
+    @media print {
+      header.top-header, .form-actions, #nuevo-registro-card, .filter-bar, .search-box, .btn-delete-row, .btn-marcar-salida, .toast-container, .stats-bar {
+        display: none !important;
+      }
+      body {
+        background: white !important;
+        color: black !important;
+      }
+      main.main-content {
+        margin: 0 !important;
+        padding: 0 !important;
+        max-width: 100% !important;
+      }
+      .card {
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+      }
+      .table-container {
+        border: 1px solid #333 !important;
+      }
+      table.veh-table th {
+        background: #eee !important;
+        color: black !important;
+      }
+      .print-header {
+        display: block !important;
+        margin-bottom: 1.5rem;
+      }
+    }
+
+    .print-header {
+      display: none;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .form-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .col-span-1, .col-span-2 { grid-column: span 1; }
+      .col-span-4 { grid-column: span 2; }
+    }
+
+    @media (max-width: 680px) {
+      header.top-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1rem;
+      }
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+      .col-span-1, .col-span-2, .col-span-4 { grid-column: span 1; }
+      .search-box {
+        width: 100%;
+        min-width: unset;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <header class="top-header">
+    <div class="brand-section">
+      <div class="brand-logo">
+        <i class="fa-solid fa-car"></i>
+      </div>
+      <div class="brand-text">
+        <h1>FRANKJCR</h1>
+        <p>Control de Acceso Vehicular | Taller Automotriz</p>
+      </div>
+    </div>
+
+    <div class="top-actions">
+      <button class="btn btn-excel" onclick="exportToExcel()" title="Descargar reporte en formato Excel (.xlsx)">
+        <i class="fa-solid fa-file-excel"></i> Exportar Excel
+      </button>
+      <button class="btn btn-pdf" onclick="exportToPDF()" title="Descargar / Imprimir en PDF">
+        <i class="fa-solid fa-file-pdf"></i> Exportar PDF
+      </button>
+      <button class="btn btn-print" onclick="window.print()" title="Imprimir reporte en papel">
+        <i class="fa-solid fa-print"></i> Imprimir Reporte
+      </button>
+      <button class="btn btn-backup" onclick="exportBackupJSON()" title="Descargar copia de seguridad">
+        <i class="fa-solid fa-cloud-arrow-down"></i> Respaldo
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="main-content">
+
+    <!-- Print Header Only visible when printing -->
+    <div class="print-header">
+      <h2 style="font-size: 1.5rem; font-weight: bold; margin-bottom: 0.25rem;">FRANKJCR - Control de Acceso Vehicular</h2>
+      <p style="color: #555; font-size: 0.9rem;" id="print-date-subtitle"></p>
+      <hr style="margin: 0.75rem 0;">
+    </div>
+
+    <!-- Quick Stats Summary -->
+    <div class="stats-bar">
+      <div class="stat-card">
+        <div class="stat-icon stat-blue">
+          <i class="fa-solid fa-car-side"></i>
+        </div>
+        <div class="stat-info">
+          <h4 id="stat-total-hoy">0</h4>
+          <p>Ingresos de Hoy</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon stat-yellow">
+          <i class="fa-solid fa-wrench"></i>
+        </div>
+        <div class="stat-info">
+          <h4 id="stat-en-taller">0</h4>
+          <p>Actualmente en Taller</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon stat-green">
+          <i class="fa-solid fa-circle-check"></i>
+        </div>
+        <div class="stat-info">
+          <h4 id="stat-salidas">0</h4>
+          <p>Salidas Completadas Hoy</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card: Nuevo Registro de Vehículo -->
+    <section class="card" id="nuevo-registro-card">
+      <div class="card-header-title">
+        <i class="fa-solid fa-square-plus"></i>
+        <span>Nuevo Registro de Vehículo</span>
+        <div class="auto-badge" title="La fecha y la hora actual se capturan de forma 100% automática en tiempo real">
+          <i class="fa-solid fa-bolt"></i> Hora Automática Activa
+        </div>
+      </div>
+
+      <form id="vehiculoForm" onsubmit="guardarRegistro(event)">
+        <div class="form-grid">
+
+          <!-- Fecha (Automática) -->
+          <div class="form-group col-span-1">
+            <label for="fecha">Fecha <span class="req">*</span></label>
+            <div class="input-wrapper">
+              <input type="date" id="fecha" required>
+            </div>
+          </div>
+
+          <!-- Placa -->
+          <div class="form-group col-span-1">
+            <label for="placa">Placa <span class="req">*</span> <span class="hint">Ej: ABC-123</span></label>
+            <div class="input-wrapper">
+              <input type="text" id="placa" class="input-placa" placeholder="ABC-123" required autocomplete="off" oninput="handlePlacaInput(this)">
+              <i class="fa-solid fa-id-card input-icon"></i>
+            </div>
+          </div>
+
+          <!-- Marca -->
+          <div class="form-group col-span-1">
+            <label for="marca">Marca de Auto <span class="req">*</span></label>
+            <div class="input-wrapper">
+              <input type="text" id="marca" list="marcasList" placeholder="Toyota, Ford, Nissan..." required autocomplete="off">
+              <i class="fa-solid fa-car input-icon"></i>
+            </div>
+            <datalist id="marcasList">
+              <option value="Toyota">
+              <option value="Nissan">
+              <option value="Hyundai">
+              <option value="Kia">
+              <option value="Chevrolet">
+              <option value="Ford">
+              <option value="Honda">
+              <option value="Mazda">
+              <option value="Brilliance">
+              <option value="Volkswagen">
+              <option value="Suzuki">
+              <option value="Mitsubishi">
+              <option value="Renault">
+              <option value="Chery">
+              <option value="JAC">
+              <option value="Changan">
+              <option value="Subaru">
+            </datalist>
+          </div>
+
+          <!-- Modelo -->
+          <div class="form-group col-span-1">
+            <label for="modelo">Modelo de Auto <span class="req">*</span></label>
+            <div class="input-wrapper">
+              <input type="text" id="modelo" placeholder="Corolla, Ranger, V3..." required autocomplete="off">
+              <i class="fa-solid fa-gauge-high input-icon"></i>
+            </div>
+          </div>
+
+          <!-- Nombre del Cliente -->
+          <div class="form-group col-span-2">
+            <label for="cliente">Nombre del Cliente <span class="req">*</span></label>
+            <div class="input-wrapper">
+              <input type="text" id="cliente" placeholder="Nombre y Apellido" required autocomplete="off">
+              <i class="fa-solid fa-user input-icon"></i>
+            </div>
+          </div>
+
+          <!-- Hora de Ingreso (Captada en automático) -->
+          <div class="form-group col-span-1">
+            <label for="hora_ingreso">
+              Hora de Ingreso <span class="req">*</span>
+              <span class="hint" style="color: #2563eb; cursor: pointer;" onclick="actualizarHoraActual('hora_ingreso')" title="Click para refrescar a la hora exacta"><i class="fa-solid fa-rotate-right"></i> Ahora</span>
+            </label>
+            <div class="input-wrapper">
+              <input type="time" id="hora_ingreso" required>
+            </div>
+          </div>
+
+          <!-- Hora de Salida (Opcional al entrar) -->
+          <div class="form-group col-span-1">
+            <label for="hora_salida">
+              Hora de Salida <span class="hint">(Opcional al entrar)</span>
+            </label>
+            <div class="input-wrapper">
+              <input type="time" id="hora_salida">
+            </div>
+          </div>
+
+          <!-- Motivo -->
+          <div class="form-group col-span-2">
+            <label for="motivo">Motivo <span class="req">*</span></label>
+            <div class="input-wrapper">
+              <input type="text" id="motivo" list="motivosList" placeholder="Ej: Cambio de aceite, revisión de frenos, Llegada cita..." required autocomplete="off">
+              <i class="fa-solid fa-clipboard-list input-icon"></i>
+            </div>
+            <datalist id="motivosList">
+              <option value="LLEGADA CITA">
+              <option value="Cambio de aceite y filtro">
+              <option value="Revisión de frenos">
+              <option value="Mantenimiento preventivo">
+              <option value="Alineación y balanceo">
+              <option value="Diagnóstico con escáner">
+              <option value="Reparación de suspensión">
+              <option value="Sistema eléctrico / Batería">
+              <option value="Lavado y detallado">
+            </datalist>
+          </div>
+
+          <!-- Observaciones -->
+          <div class="form-group col-span-2">
+            <label for="observaciones">Observaciones</label>
+            <div class="input-wrapper">
+              <input type="text" id="observaciones" placeholder="Ej: Rayón puerta izquierda, sin antena, sin observaciones..." autocomplete="off">
+              <i class="fa-solid fa-comment-dots input-icon"></i>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+          <button type="button" class="btn btn-clear" onclick="limpiarFormulario(true)" title="Borrar todo el formulario con un solo click">
+            <i class="fa-solid fa-eraser"></i> Limpiar Formulario
+          </button>
+          <button type="submit" class="btn btn-save" title="Guardar registro en la base de datos">
+            <i class="fa-solid fa-check"></i> Guardar Registro
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Card: Listado de Control Vehicular -->
+    <section class="card">
+      <div class="listado-header-row">
+        <div class="listado-title">
+          <h2>Listado de Control Vehicular</h2>
+          <p>Total de registros en este período: <strong id="total-registros-label" style="color: #0f172a;">0</strong></p>
+        </div>
+
+        <div class="search-box">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="searchInput" placeholder="Buscar por placa, cliente, marca, motivo..." oninput="filtrarRegistros()">
+        </div>
+      </div>
+
+      <!-- Filters Row -->
+      <div class="filter-bar">
+        <div class="filter-label">
+          <i class="fa-regular fa-calendar-days" style="color: #2563eb;"></i> Ver por Mes:
+        </div>
+        <div class="filter-pills" id="monthPillsContainer">
+          <!-- Filled dynamically by JavaScript -->
+        </div>
+      </div>
+
+      <!-- Table Section -->
+      <div class="month-banner">
+        <span id="active-month-title"><i class="fa-solid fa-calendar-check" style="color: #2563eb; margin-right: 6px;"></i> REGISTROS</span>
+        <span class="veh-count" id="badge-veh-count">0 Vehículos</span>
+      </div>
+
+      <div class="table-container">
+        <table class="veh-table" id="vehiculosTable">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Placa</th>
+              <th>Marca</th>
+              <th>Modelo</th>
+              <th>Cliente</th>
+              <th>Hora Ingreso</th>
+              <th>Hora Salida</th>
+              <th>Motivo</th>
+              <th>Observaciones</th>
+              <th style="text-align: center;">Acción</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <!-- Dynamic Rows -->
+          </tbody>
+        </table>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="empty-state" style="display: none;">
+          <i class="fa-solid fa-car-tunnel"></i>
+          <h3>No hay vehículos registrados en este filtro</h3>
+          <p>Agrega un nuevo registro en el formulario superior.</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script>
+    // --- ESTADO & ALMACENAMIENTO ---
+    const STORAGE_KEY = 'FRANKJCR_CONTROL_VEHICULAR_DB';
+    let registros = [];
+    let filtroMesActivo = 'TODOS';
+    let ultimoEliminado = null;
+
+    // Inicialización al cargar la página
+    document.addEventListener('DOMContentLoaded', () => {
+      cargarRegistros();
+      inicializarFormularioAutomatico();
+      renderizarPillsMeses();
+      actualizarVista();
+      actualizarEstadisticas();
+
+      // Refrescar hora del formulario periódicamente si el campo está vacío o no se ha modificado
+      setInterval(() => {
+        if (!document.getElementById('hora_ingreso').dataset.manual) {
+          capturarHoraActualAutomatica('hora_ingreso');
+        }
+      }, 30000); // Cada 30 seg
+    });
+
+    // Cargar datos de LocalStorage
+    function cargarRegistros() {
+      const data = localStorage.getItem(STORAGE_KEY);
+      if (data) {
+        try {
+          registros = JSON.parse(data);
+        } catch (e) {
+          console.error("Error parseando datos de almacenamiento local", e);
+          registros = [];
+        }
+      } else {
+        // Datos de ejemplo iniciales (similares a los mostrados en la captura)
+        const hoy = new Date().toISOString().split('T')[0];
+        registros = [
+          {
+            id: 'rec_1',
+            fecha: hoy,
+            placa: 'BJZ-369',
+            marca: 'BRILLIANCE',
+            modelo: 'V3',
+            cliente: 'JONATHAN CORONEL',
+            hora_ingreso: '09:30',
+            hora_salida: '',
+            motivo: 'LLEGADA CITA',
+            observaciones: 'Sin observaciones'
+          },
+          {
+            id: 'rec_2',
+            fecha: hoy,
+            placa: 'BZW-002',
+            marca: 'NISSAN',
+            modelo: 'X-TRAIL',
+            cliente: 'ROLANDO',
+            hora_ingreso: '09:00',
+            hora_salida: '',
+            motivo: 'LLEGADA CITA',
+            observaciones: 'Sin observaciones'
+          }
+        ];
+        guardarEnStorage();
+      }
+    }
+
+    function guardarEnStorage() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(registros));
+    }
+
+    // --- CAPTURA AUTOMÁTICA DE HORA Y FECHA ---
+    function obtenerFechaHoyISO() {
+      const d = new Date();
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    function obtenerHoraActualHHMM() {
+      const d = new Date();
+      const hours = String(d.getHours()).padStart(2, '0');
+      const minutes = String(d.getMinutes()).padStart(2, '0');
+      return `${hours}:${minutes}`;
+    }
+
+    function capturarHoraActualAutomatica(elementId) {
+      const el = document.getElementById(elementId);
+      if (el) {
+        el.value = obtenerHoraActualHHMM();
+      }
+    }
+
+    function actualizarHoraActual(elementId) {
+      capturarHoraActualAutomatica(elementId);
+      showToast('Hora actualizada a la actual', 'info');
+    }
+
+    function inicializarFormularioAutomatico() {
+      const fechaEl = document.getElementById('fecha');
+      fechaEl.value = obtenerFechaHoyISO();
+
+      capturarHoraActualAutomatica('hora_ingreso');
+      delete document.getElementById('hora_ingreso').dataset.manual;
+
+      document.getElementById('hora_salida').value = '';
+      document.getElementById('observaciones').value = 'Sin observaciones';
+
+      // Detectar si el usuario cambia la hora manualmente
+      document.getElementById('hora_ingreso').addEventListener('input', function() {
+        this.dataset.manual = "true";
+      });
+    }
+
+    // --- FORMATEO AUTOMÁTICO DE PLACA Y AUTOCOMPLETADO INTELIGENTE ---
+    function handlePlacaInput(input) {
+      let val = input.value.toUpperCase().replace(/[^A-Z0-9-]/g, '');
+      
+      // Auto-insertar guión tras 3 caracteres si no existe
+      if (val.length === 3 && !val.includes('-')) {
+        val = val + '-';
+      }
+      input.value = val;
+
+      // Buscar si el auto ya ha ingresado antes para autocompletar datos del cliente
+      if (val.length >= 6) {
+        const previo = registros.find(r => r.placa.toUpperCase() === val);
+        if (previo) {
+          if (!document.getElementById('cliente').value) document.getElementById('cliente').value = previo.cliente;
+          if (!document.getElementById('marca').value) document.getElementById('marca').value = previo.marca;
+          if (!document.getElementById('modelo').value) document.getElementById('modelo').value = previo.modelo;
+          showToast(`¡Vehículo reconocido! Datos de ${previo.cliente} autocompletados.`, 'info');
+        }
+      }
+    }
+
+    // --- GUARDAR REGISTRO ---
+    function guardarRegistro(e) {
+      e.preventDefault();
+
+      const fecha = document.getElementById('fecha').value;
+      const placa = document.getElementById('placa').value.trim().toUpperCase();
+      const marca = document.getElementById('marca').value.trim().toUpperCase();
+      const modelo = document.getElementById('modelo').value.trim().toUpperCase();
+      const cliente = document.getElementById('cliente').value.trim().toUpperCase();
+      const hora_ingreso = document.getElementById('hora_ingreso').value;
+      const hora_salida = document.getElementById('hora_salida').value;
+      const motivo = document.getElementById('motivo').value.trim();
+      const observaciones = document.getElementById('observaciones').value.trim() || 'Sin observaciones';
+
+      if (!placa || !marca || !modelo || !cliente || !hora_ingreso) {
+        showToast('Por favor completa los campos requeridos', 'danger');
+        return;
+      }
+
+      const nuevo = {
+        id: 'veh_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+        fecha,
+        placa,
+        marca,
+        modelo,
+        cliente,
+        hora_ingreso,
+        hora_salida,
+        motivo,
+        observaciones
+      };
+
+      // Agregar al inicio de la lista
+      registros.unshift(nuevo);
+      guardarEnStorage();
+
+      showToast(`Vehículo ${placa} registrado con éxito`, 'success');
+
+      limpiarFormulario(false);
+      renderizarPillsMeses();
+      actualizarVista();
+      actualizarEstadisticas();
+    }
+
+    // --- LIMPIAR FORMULARIO CON 1 SOLO CLIC ---
+    function limpiarFormulario(userTriggered = true) {
+      document.getElementById('placa').value = '';
+      document.getElementById('marca').value = '';
+      document.getElementById('modelo').value = '';
+      document.getElementById('cliente').value = '';
+      document.getElementById('motivo').value = '';
+      document.getElementById('observaciones').value = 'Sin observaciones';
+      
+      // Restablecer fecha y hora automáticas
+      inicializarFormularioAutomatico();
+
+      if (userTriggered) {
+        showToast('Formulario limpiado con 1 clic', 'info');
+        document.getElementById('placa').focus();
+      }
+    }
+
+    // --- MARCAR SALIDA CON 1 SOLO CLIC AUTOMÁTICO ---
+    function marcarSalidaConUnClick(id) {
+      const reg = registros.find(r => r.id === id);
+      if (!reg) return;
+
+      const horaActual = obtenerHoraActualHHMM();
+      reg.hora_salida = horaActual;
+
+      guardarEnStorage();
+      actualizarVista();
+      actualizarEstadisticas();
+      showToast(`Salida marcada para ${reg.placa} a las ${horaActual} hs`, 'success');
+    }
+
+    // --- BORRAR REGISTRO CON 1 SOLO CLIC ---
+    function borrarRegistro(id) {
+      const index = registros.findIndex(r => r.id === id);
+      if (index === -1) return;
+
+      ultimoEliminado = { item: registros[index], index };
+      const placaEliminada = registros[index].placa;
+
+      registros.splice(index, 1);
+      guardarEnStorage();
+      renderizarPillsMeses();
+      actualizarVista();
+      actualizarEstadisticas();
+
+      showToastWithUndo(`Registro de ${placaEliminada} borrado`, () => {
+        if (ultimoEliminado) {
+          registros.splice(ultimoEliminado.index, 0, ultimoEliminado.item);
+          guardarEnStorage();
+          renderizarPillsMeses();
+          actualizarVista();
+          actualizarEstadisticas();
+          showToast('Registro restaurado', 'success');
+          ultimoEliminado = null;
+        }
+      });
+    }
+
+    // --- FILTRADO Y RENDERIZADO ---
+    const NOMBRES_MESES = [
+      'ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO',
+      'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'
+    ];
+
+    function obtenerMesAnoClave(fechaISO) {
+      if (!fechaISO) return '';
+      const [year, month] = fechaISO.split('-');
+      const mesIndex = parseInt(month, 10) - 1;
+      return `${NOMBRES_MESES[mesIndex]} ${year}`;
+    }
+
+    function renderizarPillsMeses() {
+      const container = document.getElementById('monthPillsContainer');
+      const mesesMap = {};
+
+      registros.forEach(r => {
+        const clave = obtenerMesAnoClave(r.fecha);
+        if (clave) {
+          mesesMap[clave] = (mesesMap[clave] || 0) + 1;
+        }
+      });
+
+      const mesesKeys = Object.keys(mesesMap).sort((a, b) => b.localeCompare(a));
+
+      let html = `
+        <button class="pill-btn ${filtroMesActivo === 'TODOS' ? 'active' : ''}" onclick="seleccionarFiltroMes('TODOS')">
+          <i class="fa-solid fa-list-ul"></i> Ver Todos Separados <span class="pill-badge">${registros.length}</span>
+        </button>
+      `;
+
+      mesesKeys.forEach(m => {
+        const isActive = filtroMesActivo === m;
+        html += `
+          <button class="pill-btn ${isActive ? 'active' : ''}" onclick="seleccionarFiltroMes('${m}')">
+            ${m} <span class="pill-badge">${mesesMap[m]}</span>
+          </button>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    function seleccionarFiltroMes(mes) {
+      filtroMesActivo = mes;
+      renderizarPillsMeses();
+      actualizarVista();
+    }
+
+    function filtrarRegistros() {
+      actualizarVista();
+    }
+
+    function actualizarVista() {
+      const query = (document.getElementById('searchInput').value || '').trim().toLowerCase();
+      const tbody = document.getElementById('tableBody');
+      const emptyState = document.getElementById('emptyState');
+      const totalLabel = document.getElementById('total-registros-label');
+      const monthTitle = document.getElementById('active-month-title');
+      const badgeCount = document.getElementById('badge-veh-count');
+
+      // Filtrar registros
+      let filtrados = registros.filter(r => {
+        // Filtro por mes
+        if (filtroMesActivo !== 'TODOS') {
+          const clave = obtenerMesAnoClave(r.fecha);
+          if (clave !== filtroMesActivo) return false;
+        }
+
+        // Filtro por búsqueda
+        if (query) {
+          const searchCorpus = `${r.placa} ${r.cliente} ${r.marca} ${r.modelo} ${r.motivo} ${r.observaciones} ${r.fecha}`.toLowerCase();
+          if (!searchCorpus.includes(query)) return false;
+        }
+
+        return true;
+      });
+
+      totalLabel.textContent = filtrados.length;
+      badgeCount.textContent = `${filtrados.length} Vehículos`;
+      monthTitle.innerHTML = `<i class="fa-solid fa-calendar-check" style="color: #2563eb; margin-right: 6px;"></i> ${filtroMesActivo === 'TODOS' ? 'TODOS LOS MESES' : filtroMesActivo}`;
+
+      if (filtrados.length === 0) {
+        tbody.innerHTML = '';
+        emptyState.style.display = 'block';
+        return;
+      }
+
+      emptyState.style.display = 'none';
+
+      let html = '';
+      filtrados.forEach(r => {
+        // Columna de hora de salida: o badge si ya salió o botón de 1 solo clic para marcarla
+        let salidaHtml = '';
+        if (r.hora_salida) {
+          salidaHtml = `
+            <span class="time-out-done" title="Salida completada">
+              <i class="fa-solid fa-check"></i> ${r.hora_salida} hs
+            </span>
+          `;
+        } else {
+          salidaHtml = `
+            <button class="btn-marcar-salida" onclick="marcarSalidaConUnClick('${r.id}')" title="Hacer clic para capturar automáticamente la hora de salida actual">
+              <i class="fa-regular fa-clock"></i> Marcar Salida
+            </button>
+          `;
+        }
+
+        html += `
+          <tr>
+            <td>${r.fecha}</td>
+            <td><span class="plate-badge">${r.placa}</span></td>
+            <td style="font-weight: 600;">${r.marca}</td>
+            <td>${r.modelo}</td>
+            <td style="font-weight: 500;">${r.cliente}</td>
+            <td><span class="time-in">${r.hora_ingreso} hs</span></td>
+            <td>${salidaHtml}</td>
+            <td>${r.motivo}</td>
+            <td><span class="obs-text" title="${r.observaciones}">${r.observaciones || 'Sin observaciones'}</span></td>
+            <td style="text-align: center;">
+              <button class="btn-delete-row" onclick="borrarRegistro('${r.id}')" title="Borrar registro con 1 solo click">
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+      });
+
+      tbody.innerHTML = html;
+    }
+
+    function actualizarEstadisticas() {
+      const hoyISO = obtenerFechaHoyISO();
+      const registrosHoy = registros.filter(r => r.fecha === hoyISO);
+
+      document.getElementById('stat-total-hoy').textContent = registrosHoy.length;
+      
+      const enTaller = registros.filter(r => !r.hora_salida);
+      document.getElementById('stat-en-taller').textContent = enTaller.length;
+
+      const salidasHoy = registrosHoy.filter(r => r.hora_salida);
+      document.getElementById('stat-salidas').textContent = salidasHoy.length;
+
+      // Subtítulo de impresión
+      const printSub = document.getElementById('print-date-subtitle');
+      if (printSub) {
+        printSub.textContent = `Generado el: ${new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}`;
+      }
+    }
+
+    // --- NOTIFICACIONES TOAST CON ACCIÓN DE DESHACER ---
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      
+      let icon = 'circle-info';
+      if (type === 'success') icon = 'circle-check';
+      if (type === 'danger') icon = 'triangle-exclamation';
+
+      toast.innerHTML = `<i class="fa-solid fa-${icon}"></i> <span>${message}</span>`;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.transition = 'opacity 0.3s, transform 0.3s';
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(100%)';
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    function showToastWithUndo(message, onUndo) {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = `toast danger`;
+
+      toast.innerHTML = `
+        <i class="fa-solid fa-trash-can"></i> 
+        <span>${message}</span>
+        <button class="toast-undo-btn" id="undoBtn"><i class="fa-solid fa-rotate-left"></i> Deshacer</button>
+      `;
+
+      container.appendChild(toast);
+
+      const undoBtn = toast.querySelector('#undoBtn');
+      undoBtn.addEventListener('click', () => {
+        onUndo();
+        toast.remove();
+      });
+
+      setTimeout(() => {
+        if (toast.parentNode) {
+          toast.style.transition = 'opacity 0.3s, transform 0.3s';
+          toast.style.opacity = '0';
+          toast.style.transform = 'translateX(100%)';
+          setTimeout(() => toast.remove(), 300);
+        }
+      }, 5000);
+    }
+
+    // --- EXPORTAR A EXCEL (.XLSX) ---
+    function exportToExcel() {
+      if (registros.length === 0) {
+        showToast('No hay registros para exportar', 'danger');
+        return;
+      }
+
+      const rows = registros.map((r, i) => ({
+        "N°": i + 1,
+        "Fecha": r.fecha,
+        "Placa": r.placa,
+        "Marca": r.marca,
+        "Modelo": r.modelo,
+        "Cliente": r.cliente,
+        "Hora Ingreso": r.hora_ingreso,
+        "Hora Salida": r.hora_salida || 'En Taller',
+        "Motivo": r.motivo,
+        "Observaciones": r.observaciones
+      }));
+
+      const worksheet = XLSX.utils.json_to_sheet(rows);
+      
+      // Auto-ancho de columnas
+      const colWidths = [
+        { wch: 5 }, { wch: 12 }, { wch: 12 }, { wch: 15 },
+        { wch: 15 }, { wch: 25 }, { wch: 14 }, { wch: 14 },
+        { wch: 25 }, { wch: 30 }
+      ];
+      worksheet['!cols'] = colWidths;
+
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Control Vehicular");
+
+      const nombreArchivo = `FRANKJCR_Control_Vehicular_${obtenerFechaHoyISO()}.xlsx`;
+      XLSX.writeFile(workbook, nombreArchivo);
+      showToast('Archivo Excel descargado exitosamente', 'success');
+    }
+
+    // --- EXPORTAR A PDF / IMPRESIÓN DIRECTA ---
+    function exportToPDF() {
+      if (registros.length === 0) {
+        showToast('No hay registros para exportar', 'danger');
+        return;
+      }
+      showToast('Abriendo ventana para Guardar como PDF / Imprimir...', 'info');
+      window.print();
+    }
+
+    // --- COPIA DE SEGURIDAD JSON ---
+    function exportBackupJSON() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(registros, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `FRANKJCR_Respaldo_${obtenerFechaHoyISO()}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+      showToast('Copia de respaldo descargada', 'success');
+    }
+  </script>
+</body>
+</html>
